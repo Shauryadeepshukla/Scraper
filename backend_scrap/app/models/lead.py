@@ -55,6 +55,22 @@ class Lead(Base):
         nullable=True,
     )
 
+    location: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    website: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    google_maps_url: Mapped[Optional[str]] = mapped_column(
+        String(1000),
+        index=True,
+        nullable=True,
+    )
+
     qualification: Mapped[Optional[str]] = mapped_column(
         String(255),
         nullable=True,

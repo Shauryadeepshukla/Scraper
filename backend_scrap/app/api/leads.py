@@ -1,32 +1,25 @@
-from uuid import uuid4
-from app.services.lead_service import (
-    find_duplicate_lead,
-    normalize_email,
-    normalize_phone,
-)
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.models.lead_status_history import LeadStatusHistory
-from app.database.connection import get_db
-from app.models.lead import Lead
-from app.schemas.lead import (
-    LeadCreate,
-    LeadResponse,
-    LeadUpdate,
-)
-
+import io
 from typing import Optional
+import pandas as pd
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from fastapi.responses import StreamingResponse
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 from app.database.connection import get_db
 from app.models.lead import Lead
+from app.models.lead_status_history import LeadStatusHistory
 from app.schemas.lead import (
     LeadCreate,
     LeadResponse,
     LeadUpdate,
+)
+from app.services.lead_service import (
+    find_duplicate_lead,
+    generate_lead_id,
+    normalize_email,
+    normalize_phone,
 )
 
 router = APIRouter(
@@ -35,8 +28,6 @@ router = APIRouter(
 )
 
 
-def generate_lead_id() -> str:
-    return f"LD-{uuid4().hex[:8].upper()}"
 @router.post(
     "",
     response_model=LeadResponse,
@@ -58,6 +49,8 @@ def create_lead(
         db=db,
         mobile=normalized_mobile,
         email=normalized_email,
+        google_maps_url=lead_data.google_maps_url,
+        source_id=lead_data.source_id,
     )
 
     if duplicate:
@@ -77,6 +70,9 @@ def create_lead(
         mobile=normalized_mobile,
         email=normalized_email,
         city=lead_data.city,
+        location=lead_data.location,
+        website=lead_data.website,
+        google_maps_url=lead_data.google_maps_url,
         qualification=lead_data.qualification,
         programme_interested=lead_data.programme_interested,
         institution=lead_data.institution,
@@ -163,6 +159,91 @@ def get_leads(
     )
 
     return leads
+
+
+@router.get(
+    "/export",
+)
+def export_leads(
+    search: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    city: Optional[str] = Query(None),
+    source_id: Optional[int] = Query(None),
+    assigned_counsellor_id: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+):
+    query = db.query(Lead)
+
+    if search:
+        search_value = f"%{search}%"
+        query = query.filter(
+            or_(
+                Lead.name.ilike(search_value),
+                Lead.mobile.ilike(search_value),
+                Lead.email.ilike(search_value),
+                Lead.institution.ilike(search_value),
+                Lead.city.ilike(search_value),
+            )
+        )
+
+    if status:
+        query = query.filter(
+            Lead.status == status.upper()
+        )
+
+    if city:
+        query = query.filter(
+            Lead.city.ilike(f"%{city}%")
+        )
+
+    if source_id:
+        query = query.filter(
+            Lead.source_id == source_id
+        )
+
+    if assigned_counsellor_id:
+        query = query.filter(
+            Lead.assigned_counsellor_id == assigned_counsellor_id
+        )
+
+    leads = query.order_by(Lead.created_at.desc()).all()
+
+    data = []
+    for lead in leads:
+        data.append({
+            "Lead ID": lead.lead_id,
+            "Name": lead.name,
+            "Mobile": lead.mobile,
+            "Email": lead.email,
+            "City": lead.city,
+            "Location": lead.location,
+            "Website": lead.website,
+            "Google Maps URL": lead.google_maps_url,
+            "Qualification": lead.qualification,
+            "Programme Interested": lead.programme_interested,
+            "Institution": lead.institution,
+            "Status": lead.status,
+            "Assigned Counsellor ID": lead.assigned_counsellor_id,
+            "Next Follow Up": lead.next_follow_up.strftime("%Y-%m-%d %H:%M:%S") if lead.next_follow_up else "",
+            "Notes": lead.notes,
+            "Consent Status": lead.consent_status,
+            "Created At": lead.created_at.strftime("%Y-%m-%d %H:%M:%S") if lead.created_at else "",
+        })
+
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Leads")
+    output.seek(0)
+
+    headers = {
+        "Content-Disposition": 'attachment; filename="leads_export.xlsx"'
+    }
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers,
+    )
 
 @router.get(
     "/{lead_id}",

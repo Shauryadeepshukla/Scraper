@@ -9,6 +9,9 @@ class LeadBase(BaseModel):
     mobile: Optional[str] = None
     email: Optional[str] = None
     city: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    google_maps_url: Optional[str] = None
     qualification: Optional[str] = None
     programme_interested: Optional[str] = None
     institution: Optional[str] = None
@@ -28,6 +31,9 @@ class LeadUpdate(BaseModel):
     mobile: Optional[str] = None
     email: Optional[str] = None
     city: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    google_maps_url: Optional[str] = None
     qualification: Optional[str] = None
     programme_interested: Optional[str] = None
     institution: Optional[str] = None
@@ -36,6 +42,7 @@ class LeadUpdate(BaseModel):
     next_follow_up: Optional[datetime] = None
     notes: Optional[str] = None
     consent_status: Optional[str] = None
+
 
 
 class LeadResponse(LeadBase):

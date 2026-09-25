@@ -2,7 +2,9 @@ from fastapi import FastAPI
 
 from app.api.leads import router as leads_router
 from app.api.sources import router as sources_router
-
+from app.api.extractions import (
+    router as extractions_router,
+)
 app = FastAPI(
     title="Lead Management System API",
     description="Backend API for lead extraction and management",
@@ -10,7 +12,8 @@ app = FastAPI(
 )
 
 
-
+app.include_router(extractions_router
+)
 app.include_router(leads_router)
 app.include_router(sources_router)
 
