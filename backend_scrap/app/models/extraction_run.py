@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.connection import Base
 
-
 class ExtractionRun(Base):
     __tablename__ = "extraction_runs"
 
@@ -21,15 +20,26 @@ class ExtractionRun(Base):
         index=True,
     )
 
+    url: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    duration_minutes: Mapped[float] = mapped_column(
+        nullable=False,
+    )
+
     started_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.utcnow,
         nullable=False,
     )
 
-    completed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime,
-        nullable=True,
+    completed_at: Mapped[Optional[datetime]] = (
+        mapped_column(
+            DateTime,
+            nullable=True,
+        )
     )
 
     status: Mapped[str] = mapped_column(
@@ -62,14 +72,18 @@ class ExtractionRun(Base):
         nullable=False,
     )
 
-    error_message: Mapped[Optional[str]] = mapped_column(
-        Text,
-        nullable=True,
+    error_message: Mapped[Optional[str]] = (
+        mapped_column(
+            Text,
+            nullable=True,
+        )
     )
 
-    triggered_by: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("users.id"),
-        nullable=True,
+    triggered_by: Mapped[Optional[int]] = (
+        mapped_column(
+            ForeignKey("users.id"),
+            nullable=True,
+        )
     )
 
     source = relationship(
