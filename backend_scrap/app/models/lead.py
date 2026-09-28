@@ -143,3 +143,9 @@ class Lead(Base):
         back_populates="lead",
         cascade="all, delete-orphan",
     )
+
+    audit_logs = relationship(
+        "LeadAuditLog",
+        back_populates="lead",
+        cascade="all, delete-orphan",
+    )

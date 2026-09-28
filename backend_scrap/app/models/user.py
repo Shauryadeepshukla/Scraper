@@ -70,3 +70,8 @@ class User(Base):
         "LeadStatusHistory",
         back_populates="changed_by_user",
     )
+
+    audit_logs = relationship(
+        "LeadAuditLog",
+        back_populates="changed_by_user",
+    )
