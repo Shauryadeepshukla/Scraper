@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://scraper-avs5.onrender.com/api/:path*"
+        },
+        {
+            "source": "/health",
+            "destination": "https://scraper-avs5.onrender.com/health"
+        }
+    ]
+}
