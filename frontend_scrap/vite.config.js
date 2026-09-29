@@ -11,7 +11,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://scraper-backendscrap.vercel.app',
+        target: 'https://scraper-avs5.onrender.com',
         changeOrigin: true,
       },
     },
