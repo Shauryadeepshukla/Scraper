@@ -17,6 +17,7 @@ def run_extraction_job(extraction_id: int):
     Executes a background lead extraction job for Google Maps.
     Creates a dedicated database session to track progress and insert leads.
     """
+    print(f"[EXTRACTION] STARTED id={extraction_id}", flush=True)
     db = SessionLocal()
     try:
         extraction = (
@@ -34,11 +35,15 @@ def run_extraction_job(extraction_id: int):
         db.commit()
 
         try:
+            print(">>> STARTING GOOGLE MAPS EXTRACTION", flush=True)
+
             results = extract_google_maps(
                 url=extraction.url,
                 duration_minutes=extraction.duration_minutes,
                 headless=True,
             )
+
+            print(f">>> EXTRACTION FINISHED: {len(results)} results", flush=True)
 
             extraction.records_found = len(results)
 
@@ -80,6 +85,10 @@ def run_extraction_job(extraction_id: int):
             db.commit()
 
         except Exception as exc:
+            print(
+                f"[EXTRACTION ERROR] id={extraction_id}: {exc}",
+                flush=True,
+            )
             db.rollback()
             # Fetch extraction again in case session was invalidated
             extraction = (
