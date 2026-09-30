@@ -44,7 +44,7 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 function Pagination({ page, totalPages, total, limit, onPageChange, onLimitChange, loading }) {
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
-
+  const API_URL = import.meta.env.VITE_API_URL;
   const pages = useMemo(() => {
     const arr = [];
     if (totalPages <= 7) {
@@ -275,7 +275,7 @@ export default function App() {
   useEffect(() => {
     if (currentUser && activeTab === 'extractions') {
       fetchExtractions();
-      const t = setInterval(fetchExtractions, 4000);
+      const t = setInterval(fetchExtractions, 300000);
       return () => clearInterval(t);
     }
   }, [activeTab, currentUser]);
