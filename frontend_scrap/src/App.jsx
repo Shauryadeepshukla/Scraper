@@ -1053,7 +1053,7 @@ export default function App() {
                     <div>
                       <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Duration</label>
                       <div className="grid grid-cols-4 gap-3">
-                        {[0.5, 1, 2, 5].map(m => (
+                        {[0.05, 0.5, 1, 2, 5].map(m => (
                           <button key={m} type="button" onClick={() => setExtractionForm(f => ({ ...f, duration_minutes: m }))}
                             className={`py-2.5 rounded-2xl text-xs font-bold border transition-all ${extractionForm.duration_minutes === m ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30' : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-600'}`}>
                             {m} min{m > 1 ? 's' : ''}
