@@ -2,11 +2,11 @@
     "rewrites": [
         {
             "source": "/api/:path*",
-            "destination": "https://scraper-avs5.onrender.com/api/:path*"
+            "destination": "https://scraper-production-1938.up.railway.app/api/:path*"
         },
         {
             "source": "/health",
-            "destination": "https://scraper-avs5.onrender.com/health"
+            "destination": "https://scraper-production-1938.up.railway.app/health"
         }
     ]
 }
